@@ -246,7 +246,7 @@ function TextEditor({onChange}:{onChange :(e:ChangeEvent<HTMLTextAreaElement>)=>
           </div>
         </div>
         <div className="px-4 py-2 bg-white rounded-b-lg dark:bg-gray-800">
-          <label for="editor" className="sr-only">
+          <label htmlFor="editor" className="sr-only">
             Publish post
           </label>
           <textarea
