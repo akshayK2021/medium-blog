@@ -12,7 +12,7 @@ export default function Blog() {
   );
   const {username}=useDetail();
 
-  if(loading){
+  if(loading || !blog){
     return<div>
       <Appbar name={username}/>
        <div><Spinner/></div>

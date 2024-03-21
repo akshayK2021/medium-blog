@@ -22,14 +22,12 @@ export default function Auth({ type }: { type: "signup" | "signin" }) {
    localStorage.setItem("token",jwt);
    navigate("/blogs")
   
-  }catch(er:any){
+  }catch(err){
 
-
-
-    alert(`${er.response.data.message}`)
+ // @ts-expect-error: Error handling for potential response data message
+ alert(`${err.response.data.message}`);
   }
-
-  }
+}
   return (
     <div className="h-screen flex justify-center flex-col">
       <div className="flex justify-center ">
