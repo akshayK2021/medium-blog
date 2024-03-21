@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import {  PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
-import {  sign } from "hono/jwt";
+import {  decode, sign, verify } from "hono/jwt";
 import { signinInput, signupInput } from "@akshaykawadse/medium-common";
 
 
@@ -60,8 +60,8 @@ userRouter.post("/signin", async (c) => {
     const body = await c.req.json();
     const {success}=signinInput.safeParse(body);
     if(!success){
-      return c.json({
-        message:"Signin inputs not correct"
+      return c.body("Hitting Signin Route",403,{
+        message:"Inputs not correct"
       })
     }
     const user = await prisma.user.findFirst({
@@ -74,7 +74,7 @@ userRouter.post("/signin", async (c) => {
     if (!user) {
       c.status(403);
       return c.json({
-        message: "Please signup before",
+        message: "Incorrect Username or Password ",
       });
     }
     const token = await sign({ id: user.id }, c.env.JWT_SECRET);
@@ -88,3 +88,44 @@ userRouter.post("/signin", async (c) => {
   }
   return c.text("a");
 });
+
+userRouter.get("/details", async (c) => {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  const authHeader=c.req.header("authorization") || "";
+  console.log("authHea",authHeader)
+
+  const id=await verify(authHeader,c.env.JWT_SECRET);
+  const user=await prisma.user.findFirst({ where: { id: id.id } });
+  // console.log("user`",user)
+  if(user){
+    return c.json({
+     username: user.name
+    })
+     
+  }
+  else{
+    c.status(403)
+    return c.json({
+      message:"You are not logged in"
+    })
+  }
+ 
+
+})
+
+userRouter.get("/delete",async(c)=>{
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  await prisma.blog.deleteMany();
+  await prisma.user.deleteMany();
+  
+  return c.json({
+    message:"Deleted all users"
+  })
+  
+  
+
+})
